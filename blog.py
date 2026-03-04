@@ -1,7 +1,6 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
-import os
 
 # --- 1. CONFIGURAÇÃO E DESIGN RIGOROSO ---
 st.set_page_config(page_title="Blog do Chef João P. Roth", layout="wide")
@@ -30,12 +29,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-if not os.path.exists("fotos_pratos"):
-    os.makedirs("fotos_pratos")
-
-# --- 2. BANCO DE DADOS ---
+# --- 2. BANCO DE DADOS BLINDADO ---
 def inicializar_banco():
-    conn = sqlite3.connect('culinaria_v5.db')
+    conn = sqlite3.connect('culinaria_v6.db')
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS avaliacoes (
@@ -46,7 +42,7 @@ def inicializar_banco():
             tamanho TEXT,
             nota INTEGER, 
             comentario TEXT, 
-            caminho_foto TEXT
+            foto BLOB
         )
     ''')
     conn.commit()
@@ -61,9 +57,9 @@ def pagina_quem_somos():
     
     col1, col2 = st.columns([1, 2])
     with col1:
-        if os.path.exists("chef_joao.jpg"):
+        try:
             st.image("chef_joao.jpg", use_container_width=True)
-        else:
+        except:
             st.error("A foto 'chef_joao.jpg' não foi encontrada.")
             
     with col2:
@@ -80,9 +76,9 @@ def pagina_quem_somos():
     
     col3, col4 = st.columns([1, 2])
     with col3:
-        if os.path.exists("socio.jpg"):
+        try:
             st.image("socio.jpg", use_container_width=True)
-        else:
+        except:
             st.error("A foto 'socio.jpg' não foi encontrada.")
             
     with col4:
@@ -121,15 +117,13 @@ def pagina_feed():
             
             if submeteu:
                 if comida and restaurante:
-                    caminho_foto = ""
+                    foto_blob = None
                     if foto_galeria is not None:
-                        caminho_foto = os.path.join("fotos_pratos", foto_galeria.name)
-                        with open(caminho_foto, "wb") as f:
-                            f.write(foto_galeria.getbuffer())
+                        foto_blob = foto_galeria.getvalue()
                             
                     cursor = conn.cursor()
-                    cursor.execute('''INSERT INTO avaliacoes (comida, restaurante, preco, tamanho, nota, comentario, caminho_foto) 
-                                      VALUES (?, ?, ?, ?, ?, ?, ?)''', (comida, restaurante, preco, tamanho, nota, comentario, caminho_foto))
+                    cursor.execute('''INSERT INTO avaliacoes (comida, restaurante, preco, tamanho, nota, comentario, foto) 
+                                      VALUES (?, ?, ?, ?, ?, ?, ?)''', (comida, restaurante, preco, tamanho, nota, comentario, foto_blob))
                     conn.commit()
                     st.success("Avaliação salva com sucesso!")
                 else:
@@ -143,13 +137,14 @@ def pagina_feed():
         for index, linha in df.iterrows():
             col_foto, col_texto = st.columns([1, 2]) 
             with col_foto:
-                if linha['caminho_foto'] and os.path.exists(linha['caminho_foto']):
-                    st.image(linha['caminho_foto'], use_container_width=True)
+                if linha['foto'] is not None:
+                    st.image(linha['foto'], use_container_width=True)
                 else:
                     st.write("Sem foto")
             with col_texto:
-                st.subheader(f"{linha['comida']}")
-                st.markdown(f"**Restaurante:** {linha['restaurante']}")
+                # INVERSÃO APLICADA AQUI: Restaurante agora é o Título
+                st.subheader(f"{linha['restaurante']}")
+                st.markdown(f"**Prato:** {linha['comida']}")
                 st.markdown(f"**Preço:** R$ {linha['preco']:.2f} | **Nota:** {linha['nota']}/10")
                 st.markdown(f"**Tamanho do prato:** {linha['tamanho']}")
                 st.write(linha['comentario'])
@@ -158,9 +153,6 @@ def pagina_feed():
                     cursor = conn.cursor()
                     cursor.execute("DELETE FROM avaliacoes WHERE id = ?", (linha['id'],))
                     conn.commit()
-                    if linha['caminho_foto'] and os.path.exists(linha['caminho_foto']):
-                        try: os.remove(linha['caminho_foto'])
-                        except: pass 
                     st.rerun()
             st.write("---") 
     else:
