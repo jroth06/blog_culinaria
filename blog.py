@@ -7,22 +7,29 @@ st.set_page_config(page_title="Blog do Chef João P. Roth", layout="wide")
 
 st.markdown("""
     <style>
-    .stApp, section[data-testid="stSidebar"], header[data-testid="stHeader"] { background-color: #ffffff !important; }
-    .stApp p, .stApp span, .stApp div, .stApp label, .stApp li, .stApp h1, .stApp h2, .stApp h3, .stApp h4 { color: #000000 !important; }
+    /* Fundo Branco para o site, lateral, topo e também para a CAIXINHA FLUTUANTE (Popover) */
+    .stApp, section[data-testid="stSidebar"], header[data-testid="stHeader"], div[data-testid="stPopoverBody"] { background-color: #ffffff !important; }
+    
+    /* Letras Pretas para o site inteiro e dentro da caixinha flutuante */
+    .stApp p, .stApp span, .stApp div, .stApp label, .stApp li, .stApp h1, .stApp h2, .stApp h3, .stApp h4, div[data-testid="stPopoverBody"] p, div[data-testid="stPopoverBody"] span { color: #000000 !important; }
+    
     [data-testid="collapsedControl"] { color: #e60000 !important; }
     [data-testid="collapsedControl"] svg { fill: #e60000 !important; color: #e60000 !important; }
     [data-testid="stExpander"] details summary { background-color: #262730 !important; border-radius: 5px; }
     [data-testid="stExpander"] details summary p, [data-testid="stExpander"] details summary span, [data-testid="stExpander"] svg { color: #ffffff !important; font-weight: bold !important; }
     
-    /* Adicionei o Popover (caixinha de confirmação) para ficar vermelho também */
-    div.stButton > button, [data-testid="stFormSubmitButton"] > button, [data-testid="stFileUploadDropzone"] button, [data-testid="stPopover"] > button { background-color: #e60000 !important; border: none !important; }
-    div.stButton > button p, [data-testid="stFormSubmitButton"] > button p, [data-testid="stFileUploadDropzone"] button p, [data-testid="stFileUploadDropzone"] button span, [data-testid="stPopover"] > button p, [data-testid="stPopover"] > button span { color: #ffffff !important; font-weight: bold !important; }
-    div.stButton > button:hover, [data-testid="stFormSubmitButton"] > button:hover, [data-testid="stFileUploadDropzone"] button:hover, [data-testid="stPopover"] > button:hover { background-color: #cc0000 !important; }
+    /* Botões Vermelhos com Letra Branca (garantindo que o botão "Sim, apagar" também fique assim) */
+    div.stButton > button, [data-testid="stFormSubmitButton"] > button, [data-testid="stFileUploadDropzone"] button, [data-testid="stPopover"] button, div[data-testid="stPopoverBody"] button { background-color: #e60000 !important; border: none !important; }
+    div.stButton > button p, [data-testid="stFormSubmitButton"] > button p, [data-testid="stFileUploadDropzone"] button p, [data-testid="stFileUploadDropzone"] button span, [data-testid="stPopover"] button p, [data-testid="stPopover"] button span, div[data-testid="stPopoverBody"] button p { color: #ffffff !important; font-weight: bold !important; }
+    div.stButton > button:hover, [data-testid="stFormSubmitButton"] > button:hover, [data-testid="stFileUploadDropzone"] button:hover, [data-testid="stPopover"] button:hover, div[data-testid="stPopoverBody"] button:hover { background-color: #cc0000 !important; }
     
     div[data-baseweb="input"] > div, div[data-baseweb="textarea"] > div, div[data-baseweb="select"] > div { background-color: #ffffff !important; border: 1px solid #cccccc !important; }
     div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea, div[data-baseweb="select"] div, div[data-baseweb="select"] span { color: #000000 !important; }
     ul[data-baseweb="menu"] { background-color: #ffffff !important; }
     ul[data-baseweb="menu"] li { color: #000000 !important; }
+    
+    /* Borda e sombra elegante para a caixinha de apagar */
+    div[data-testid="stPopoverBody"] { border: 2px solid #e60000 !important; border-radius: 8px !important; box-shadow: 0px 4px 10px rgba(0,0,0,0.1) !important; }
     
     section[data-testid="stSidebar"] { border-right: 2px solid #e60000 !important; }
     h1 { border-bottom: 3px solid #e60000 !important; padding-bottom: 10px !important; }
@@ -149,7 +156,6 @@ def pagina_feed():
                 st.markdown(f"**Tamanho do prato:** {linha['tamanho']}")
                 st.write(linha['comentario'])
                 
-                # --- AQUI ESTÁ A MÁGICA DA CONFIRMAÇÃO ---
                 with st.popover("Apagar Avaliação"):
                     st.markdown("**Tem certeza que quer apagar?**")
                     if st.button("Sim, apagar", key=f"confirm_delete_{linha['id']}"):
