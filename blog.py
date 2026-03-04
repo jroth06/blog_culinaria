@@ -8,20 +8,25 @@ st.set_page_config(page_title="Blog do Chef João P. Roth", layout="wide")
 
 st.markdown("""
     <style>
-    /* Fundo TOTALMENTE BRANCO */
-    .stApp, section[data-testid="stSidebar"] { background-color: #ffffff !important; }
+    /* Fundo TOTALMENTE BRANCO (Fundo principal, Menu Lateral e Barra do Topo) */
+    .stApp, section[data-testid="stSidebar"], header[data-testid="stHeader"] { 
+        background-color: #ffffff !important; 
+    }
     
     /* Textos PRETOS por padrão */
-    .stApp p, .stApp span, .stApp div, .stApp label, .stApp li, .stApp h1, .stApp h2, .stApp h3, .stApp h4 { color: #000000 !important; }
+    .stApp p, .stApp span, .stApp div, .stApp label, .stApp li, .stApp h1, .stApp h2, .stApp h3, .stApp h4 { 
+        color: #000000 !important; 
+    }
     
-    /* SETINHA DO MENU EM VERMELHO */
-    [data-testid="collapsedControl"] svg { color: #e60000 !important; fill: #e60000 !important; }
+    /* SETINHA DO MENU EM VERMELHO FORTE */
+    [data-testid="collapsedControl"] { color: #e60000 !important; }
+    [data-testid="collapsedControl"] svg { fill: #e60000 !important; color: #e60000 !important; }
     
     /* Expansor (Clique aqui para escrever...) */
     [data-testid="stExpander"] details summary { background-color: #262730 !important; border-radius: 5px; }
     [data-testid="stExpander"] details summary p, [data-testid="stExpander"] details summary span, [data-testid="stExpander"] svg { color: #ffffff !important; font-weight: bold !important; }
     
-    /* TODOS OS BOTÕES VERMELHOS COM LETRA BRANCA (Inclui "Take Photo" e "Browse Files") */
+    /* TODOS OS BOTÕES VERMELHOS COM LETRA BRANCA (Inclui Botões de Foto/Upload) */
     div.stButton > button, 
     [data-testid="stFormSubmitButton"] > button,
     [data-testid="stCameraInput"] button,
@@ -96,7 +101,7 @@ def pagina_quem_somos():
             
     with col2:
         st.subheader("João P. Roth")
-        st.markdown("**Autor do blog & Nº1 Food Critic Elected by Time Magazine**")
+        st.markdown("**Autor do blog Nº1 & Food Critic Elected by Time Magazine**")
         st.markdown("> \"Com análises tecnicamente perfeitas e um nível de exigência inegociável, João P. Roth consolidou-se definitivamente como a voz mais influente da alta gastronomia mundial.\" — **Time Magazine**")
         st.markdown("> \"Durante meus oito anos na Casa Branca, lidei com crises globais de todas as naturezas. Mas afirmo com tranquilidade: nada gera mais tensão em um salão do que João P. Roth erguendo uma taça de vinho para analisá-la contra a luz. Seu paladar deveria ser tombado como patrimônio mundial.\" — **Barack Obama**")
         st.markdown("> \"A diplomacia exige resiliência, mas a crítica de Roth é um ataque fulminante e sem concessões à mediocridade. Sua exigência na mesa de jantar é, de longe, mais implacável e temida que qualquer negociação de Estado que já presenciei.\" — **Benjamin Netanyahu**")
@@ -142,10 +147,9 @@ def pagina_feed():
             comentario = st.text_area("Descrição da sua experiência")
             
             st.write("---")
-            st.markdown("**📸 Adicionar foto da comida**")
+            st.markdown("**Adicionar foto da comida**")
             
-            # --- AGORA TEMOS ABAS: GALERIA E CÂMERA LADO A LADO ---
-            aba_galeria, aba_camera = st.tabs(["📁 Subir arquivo da galeria", "📷 Tirar foto na hora"])
+            aba_galeria, aba_camera = st.tabs(["Subir arquivo da galeria", "Tirar foto na hora"])
             with aba_galeria:
                 foto_galeria = st.file_uploader("Escolha uma foto do seu celular/PC", type=['png', 'jpg', 'jpeg'])
             with aba_camera:
@@ -155,7 +159,6 @@ def pagina_feed():
             
             if submeteu:
                 if comida and restaurante:
-                    # Decide qual foto usar: prioriza a da galeria, se não tiver, pega a da câmera
                     foto_final = foto_galeria if foto_galeria is not None else foto_camera
                     
                     caminho_foto = ""
