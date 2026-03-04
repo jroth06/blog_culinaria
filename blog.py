@@ -8,55 +8,22 @@ st.set_page_config(page_title="Blog do Chef João P. Roth", layout="wide")
 
 st.markdown("""
     <style>
-    /* Fundo TOTALMENTE BRANCO (Fundo principal, Menu Lateral e Barra do Topo) */
-    .stApp, section[data-testid="stSidebar"], header[data-testid="stHeader"] { 
-        background-color: #ffffff !important; 
-    }
-    
-    /* Textos PRETOS por padrão */
-    .stApp p, .stApp span, .stApp div, .stApp label, .stApp li, .stApp h1, .stApp h2, .stApp h3, .stApp h4 { 
-        color: #000000 !important; 
-    }
-    
-    /* SETINHA DO MENU EM VERMELHO FORTE */
+    .stApp, section[data-testid="stSidebar"], header[data-testid="stHeader"] { background-color: #ffffff !important; }
+    .stApp p, .stApp span, .stApp div, .stApp label, .stApp li, .stApp h1, .stApp h2, .stApp h3, .stApp h4 { color: #000000 !important; }
     [data-testid="collapsedControl"] { color: #e60000 !important; }
     [data-testid="collapsedControl"] svg { fill: #e60000 !important; color: #e60000 !important; }
-    
-    /* Expansor (Clique aqui para escrever...) */
     [data-testid="stExpander"] details summary { background-color: #262730 !important; border-radius: 5px; }
     [data-testid="stExpander"] details summary p, [data-testid="stExpander"] details summary span, [data-testid="stExpander"] svg { color: #ffffff !important; font-weight: bold !important; }
     
-    /* TODOS OS BOTÕES VERMELHOS COM LETRA BRANCA (Inclui Botões de Foto/Upload) */
-    div.stButton > button, 
-    [data-testid="stFormSubmitButton"] > button,
-    [data-testid="stCameraInput"] button,
-    [data-testid="stFileUploadDropzone"] button { 
-        background-color: #e60000 !important; 
-        border: none !important; 
-    }
-    div.stButton > button p, 
-    [data-testid="stFormSubmitButton"] > button p,
-    [data-testid="stCameraInput"] button p,
-    [data-testid="stFileUploadDropzone"] button p,
-    [data-testid="stCameraInput"] button span,
-    [data-testid="stFileUploadDropzone"] button span { 
-        color: #ffffff !important; 
-        font-weight: bold !important; 
-    }
-    div.stButton > button:hover, 
-    [data-testid="stFormSubmitButton"] > button:hover,
-    [data-testid="stCameraInput"] button:hover,
-    [data-testid="stFileUploadDropzone"] button:hover { 
-        background-color: #cc0000 !important; 
-    }
-
-    /* Caixas de texto e seletores */
+    div.stButton > button, [data-testid="stFormSubmitButton"] > button, [data-testid="stCameraInput"] button, [data-testid="stFileUploadDropzone"] button { background-color: #e60000 !important; border: none !important; }
+    div.stButton > button p, [data-testid="stFormSubmitButton"] > button p, [data-testid="stCameraInput"] button p, [data-testid="stFileUploadDropzone"] button p, [data-testid="stCameraInput"] button span, [data-testid="stFileUploadDropzone"] button span { color: #ffffff !important; font-weight: bold !important; }
+    div.stButton > button:hover, [data-testid="stFormSubmitButton"] > button:hover, [data-testid="stCameraInput"] button:hover, [data-testid="stFileUploadDropzone"] button:hover { background-color: #cc0000 !important; }
+    
     div[data-baseweb="input"] > div, div[data-baseweb="textarea"] > div, div[data-baseweb="select"] > div { background-color: #ffffff !important; border: 1px solid #cccccc !important; }
     div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea, div[data-baseweb="select"] div, div[data-baseweb="select"] span { color: #000000 !important; }
     ul[data-baseweb="menu"] { background-color: #ffffff !important; }
     ul[data-baseweb="menu"] li { color: #000000 !important; }
     
-    /* Detalhes visuais */
     section[data-testid="stSidebar"] { border-right: 2px solid #e60000 !important; }
     h1 { border-bottom: 3px solid #e60000 !important; padding-bottom: 10px !important; }
     blockquote { border-left: 5px solid #e60000 !important; background-color: #f9f9f9 !important; padding: 15px !important; margin: 10px 0 !important; color: #000000 !important; font-style: italic !important; }
@@ -133,6 +100,18 @@ def pagina_feed():
     st.title("Feed de Críticas")
     
     with st.expander("Clique aqui para escrever uma nova avaliação"):
+        
+        # FOTOS AGORA FICAM FORA DO FORMULÁRIO PARA A CÂMERA FUNCIONAR NA HORA
+        aba_galeria, aba_camera = st.tabs(["Subir arquivo da galeria", "Tirar foto na hora"])
+        with aba_galeria:
+            foto_galeria = st.file_uploader("Escolha uma foto do seu celular/PC", type=['png', 'jpg', 'jpeg'])
+        with aba_camera:
+            ligar_camera = st.toggle("Ligar câmera agora") # Interruptor moderno!
+            foto_camera = None
+            if ligar_camera:
+                foto_camera = st.camera_input("Tire a foto da comida")
+                
+        # FORMULÁRIO DE TEXTO
         with st.form("form_nova", clear_on_submit=True):
             comida = st.text_input("Comida")
             restaurante = st.text_input("Nome do Restaurante")
@@ -146,19 +125,11 @@ def pagina_feed():
             nota = st.slider("Nota (0 a 10)", 0, 10, 5)
             comentario = st.text_area("Descrição da sua experiência")
             
-            st.write("---")
-            st.markdown("**Adicionar foto da comida**")
-            
-            aba_galeria, aba_camera = st.tabs(["Subir arquivo da galeria", "Tirar foto na hora"])
-            with aba_galeria:
-                foto_galeria = st.file_uploader("Escolha uma foto do seu celular/PC", type=['png', 'jpg', 'jpeg'])
-            with aba_camera:
-                foto_camera = st.camera_input("Tire a foto agora")
-            
             submeteu = st.form_submit_button("Publicar Avaliação")
             
             if submeteu:
                 if comida and restaurante:
+                    # O sistema descobre automaticamente se você usou a galeria ou a câmera
                     foto_final = foto_galeria if foto_galeria is not None else foto_camera
                     
                     caminho_foto = ""
