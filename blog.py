@@ -14,9 +14,10 @@ st.markdown("""
     [data-testid="stExpander"] details summary { background-color: #262730 !important; border-radius: 5px; }
     [data-testid="stExpander"] details summary p, [data-testid="stExpander"] details summary span, [data-testid="stExpander"] svg { color: #ffffff !important; font-weight: bold !important; }
     
-    div.stButton > button, [data-testid="stFormSubmitButton"] > button, [data-testid="stFileUploadDropzone"] button { background-color: #e60000 !important; border: none !important; }
-    div.stButton > button p, [data-testid="stFormSubmitButton"] > button p, [data-testid="stFileUploadDropzone"] button p, [data-testid="stFileUploadDropzone"] button span { color: #ffffff !important; font-weight: bold !important; }
-    div.stButton > button:hover, [data-testid="stFormSubmitButton"] > button:hover, [data-testid="stFileUploadDropzone"] button:hover { background-color: #cc0000 !important; }
+    /* Adicionei o Popover (caixinha de confirmação) para ficar vermelho também */
+    div.stButton > button, [data-testid="stFormSubmitButton"] > button, [data-testid="stFileUploadDropzone"] button, [data-testid="stPopover"] > button { background-color: #e60000 !important; border: none !important; }
+    div.stButton > button p, [data-testid="stFormSubmitButton"] > button p, [data-testid="stFileUploadDropzone"] button p, [data-testid="stFileUploadDropzone"] button span, [data-testid="stPopover"] > button p, [data-testid="stPopover"] > button span { color: #ffffff !important; font-weight: bold !important; }
+    div.stButton > button:hover, [data-testid="stFormSubmitButton"] > button:hover, [data-testid="stFileUploadDropzone"] button:hover, [data-testid="stPopover"] > button:hover { background-color: #cc0000 !important; }
     
     div[data-baseweb="input"] > div, div[data-baseweb="textarea"] > div, div[data-baseweb="select"] > div { background-color: #ffffff !important; border: 1px solid #cccccc !important; }
     div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea, div[data-baseweb="select"] div, div[data-baseweb="select"] span { color: #000000 !important; }
@@ -142,18 +143,21 @@ def pagina_feed():
                 else:
                     st.write("Sem foto")
             with col_texto:
-                # INVERSÃO APLICADA AQUI: Restaurante agora é o Título
                 st.subheader(f"{linha['restaurante']}")
                 st.markdown(f"**Prato:** {linha['comida']}")
                 st.markdown(f"**Preço:** R$ {linha['preco']:.2f} | **Nota:** {linha['nota']}/10")
                 st.markdown(f"**Tamanho do prato:** {linha['tamanho']}")
                 st.write(linha['comentario'])
                 
-                if st.button("Apagar Avaliação", key=f"delete_{linha['id']}"):
-                    cursor = conn.cursor()
-                    cursor.execute("DELETE FROM avaliacoes WHERE id = ?", (linha['id'],))
-                    conn.commit()
-                    st.rerun()
+                # --- AQUI ESTÁ A MÁGICA DA CONFIRMAÇÃO ---
+                with st.popover("Apagar Avaliação"):
+                    st.markdown("**Tem certeza que quer apagar?**")
+                    if st.button("Sim, apagar", key=f"confirm_delete_{linha['id']}"):
+                        cursor = conn.cursor()
+                        cursor.execute("DELETE FROM avaliacoes WHERE id = ?", (linha['id'],))
+                        conn.commit()
+                        st.rerun()
+                        
             st.write("---") 
     else:
         st.info("Nenhuma avaliação ainda. Seja o primeiro a publicar!")
