@@ -15,9 +15,9 @@ st.markdown("""
     [data-testid="stExpander"] details summary { background-color: #262730 !important; border-radius: 5px; }
     [data-testid="stExpander"] details summary p, [data-testid="stExpander"] details summary span, [data-testid="stExpander"] svg { color: #ffffff !important; font-weight: bold !important; }
     
-    div.stButton > button, [data-testid="stFormSubmitButton"] > button, [data-testid="stCameraInput"] button, [data-testid="stFileUploadDropzone"] button { background-color: #e60000 !important; border: none !important; }
-    div.stButton > button p, [data-testid="stFormSubmitButton"] > button p, [data-testid="stCameraInput"] button p, [data-testid="stFileUploadDropzone"] button p, [data-testid="stCameraInput"] button span, [data-testid="stFileUploadDropzone"] button span { color: #ffffff !important; font-weight: bold !important; }
-    div.stButton > button:hover, [data-testid="stFormSubmitButton"] > button:hover, [data-testid="stCameraInput"] button:hover, [data-testid="stFileUploadDropzone"] button:hover { background-color: #cc0000 !important; }
+    div.stButton > button, [data-testid="stFormSubmitButton"] > button, [data-testid="stFileUploadDropzone"] button { background-color: #e60000 !important; border: none !important; }
+    div.stButton > button p, [data-testid="stFormSubmitButton"] > button p, [data-testid="stFileUploadDropzone"] button p, [data-testid="stFileUploadDropzone"] button span { color: #ffffff !important; font-weight: bold !important; }
+    div.stButton > button:hover, [data-testid="stFormSubmitButton"] > button:hover, [data-testid="stFileUploadDropzone"] button:hover { background-color: #cc0000 !important; }
     
     div[data-baseweb="input"] > div, div[data-baseweb="textarea"] > div, div[data-baseweb="select"] > div { background-color: #ffffff !important; border: 1px solid #cccccc !important; }
     div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea, div[data-baseweb="select"] div, div[data-baseweb="select"] span { color: #000000 !important; }
@@ -100,18 +100,6 @@ def pagina_feed():
     st.title("Feed de Críticas")
     
     with st.expander("Clique aqui para escrever uma nova avaliação"):
-        
-        # FOTOS AGORA FICAM FORA DO FORMULÁRIO PARA A CÂMERA FUNCIONAR NA HORA
-        aba_galeria, aba_camera = st.tabs(["Subir arquivo da galeria", "Tirar foto na hora"])
-        with aba_galeria:
-            foto_galeria = st.file_uploader("Escolha uma foto do seu celular/PC", type=['png', 'jpg', 'jpeg'])
-        with aba_camera:
-            ligar_camera = st.toggle("Ligar câmera agora") # Interruptor moderno!
-            foto_camera = None
-            if ligar_camera:
-                foto_camera = st.camera_input("Tire a foto da comida")
-                
-        # FORMULÁRIO DE TEXTO
         with st.form("form_nova", clear_on_submit=True):
             comida = st.text_input("Comida")
             restaurante = st.text_input("Nome do Restaurante")
@@ -125,18 +113,19 @@ def pagina_feed():
             nota = st.slider("Nota (0 a 10)", 0, 10, 5)
             comentario = st.text_area("Descrição da sua experiência")
             
+            st.write("---")
+            st.markdown("**Adicionar foto da comida**")
+            foto_galeria = st.file_uploader("Escolha uma foto do seu celular/PC", type=['png', 'jpg', 'jpeg'])
+            
             submeteu = st.form_submit_button("Publicar Avaliação")
             
             if submeteu:
                 if comida and restaurante:
-                    # O sistema descobre automaticamente se você usou a galeria ou a câmera
-                    foto_final = foto_galeria if foto_galeria is not None else foto_camera
-                    
                     caminho_foto = ""
-                    if foto_final is not None:
-                        caminho_foto = os.path.join("fotos_pratos", foto_final.name)
+                    if foto_galeria is not None:
+                        caminho_foto = os.path.join("fotos_pratos", foto_galeria.name)
                         with open(caminho_foto, "wb") as f:
-                            f.write(foto_final.getbuffer())
+                            f.write(foto_galeria.getbuffer())
                             
                     cursor = conn.cursor()
                     cursor.execute('''INSERT INTO avaliacoes (comida, restaurante, preco, tamanho, nota, comentario, caminho_foto) 
